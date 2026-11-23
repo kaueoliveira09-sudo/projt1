@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Football Career Simulator</title>
+<style>
+:root{--bg:#0b1220;--panel:#121d2e;--panel2:#172438;--line:#263750;--green:#20d18a;--muted:#9eacc0;--white:#f4f7fb;--red:#ff6474;--yellow:#ffd166}
+*{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;background:radial-gradient(ellipse at top,#14263a 0,#0b1220 55%);color:var(--white);font-family:Inter,Arial,Helvetica,sans-serif}
+header{min-height:76px;padding:16px 6%;display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;background:#080f1b;border-bottom:1px solid #1c3540;position:sticky;top:0;z-index:5}
+.logo{font-weight:900;letter-spacing:1.8px;font-size:21px}.logo span{color:var(--green)}
+nav{display:flex;gap:9px;flex-wrap:wrap}nav button{background:transparent;color:#c7d3e2;padding:10px 13px;border:1px solid transparent;border-radius:8px;font-weight:700}nav button:hover,nav button.active{color:var(--green);background:#14283a;border-color:#244b49}
+button,.btn{cursor:pointer;border:0;border-radius:8px;padding:12px 17px;background:var(--green);color:#062016;font-weight:800;font-size:13px;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+button:hover,.btn:hover{filter:brightness(.92);transform:translateY(-1px)}button.secondary,.btn.secondary{background:#263950;color:#eaf1fa}button.danger{background:#532b38;color:#ffdce1}button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+main{width:min(1120px,90%);margin:38px auto 65px;min-height:65vh}
+.hero{text-align:center;padding:80px 20px 70px;background:linear-gradient(135deg,#132a3b,#101b2c);border:1px solid var(--line);border-radius:20px;position:relative;overflow:hidden}
+.hero:before{content:"⚽";position:absolute;font-size:190px;opacity:.045;right:5%;top:8px}.eyebrow{color:var(--green);font-size:11px;font-weight:900;letter-spacing:3px;text-transform:uppercase}
+h1{font-size:clamp(28px,5vw,46px);line-height:1.1;margin:13px 0}.hero p,.muted{color:var(--muted);line-height:1.7}.hero p{font-size:16px;margin:0 auto 28px;max-width:600px}.actions{display:flex;gap:11px;flex-wrap:wrap}.hero .actions{justify-content:center}
+.form-card{max-width:510px;margin:30px auto;background:var(--panel);border:1px solid var(--line);padding:30px;border-radius:16px;box-shadow:0 20px 55px #0003}
+.form-card h2{font-size:25px;margin-bottom:8px}.form-card>p{color:var(--muted);margin-bottom:18px;line-height:1.5}
+label{display:block;margin:15px 0 7px;font-size:13px;color:#d3deeb;font-weight:700}
+input,select{width:100%;padding:13px 14px;background:#0b1523;border:1px solid #30435d;border-radius:8px;color:white;outline:none;font-size:14px}
+input:focus,select:focus{border-color:var(--green);box-shadow:0 0 0 3px #20d18a18}
+.form-card form>button{width:100%;margin-top:22px}.form-foot{margin-top:18px;color:var(--muted);font-size:13px}.link{color:var(--green);background:none;padding:0;border:0;text-decoration:underline}
+.page-head{margin-bottom:25px}.page-head h1{font-size:30px}.page-head p{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:18px 0}
+.card,.panel{background:linear-gradient(145deg,var(--panel),#101a29);border:1px solid var(--line);border-radius:13px;padding:20px}
+.card small{color:var(--green);font-size:10px;font-weight:900;letter-spacing:1.3px}.card h3{font-size:19px;margin-top:10px;overflow-wrap:anywhere}
+.panel{margin:18px 0}.panel h2{font-size:19px;margin-bottom:18px}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.stat{padding:18px 10px;text-align:center;border-radius:10px;background:#0b1523;border:1px solid #22344b;border-bottom:3px solid var(--green)}
+.stat strong{display:block;color:var(--green);font-size:29px;margin-bottom:6px}.stat span{font-size:12px;color:var(--muted)}
+.stat.gold{border-bottom-color:var(--yellow)}.stat.gold strong{color:var(--yellow)}
+.actions-row{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0}
+.score{text-align:center;font-size:52px;font-weight:900;color:var(--green);margin:15px 0}.score small{font-size:14px;color:var(--muted)}
+.notice{padding:13px 15px;border-radius:9px;background:#123c30;color:#a9f4d1;margin:15px 0;border:1px solid #1b654c}
+.notice.error{background:#482630;color:#ffd8df;border-color:#743544}
+.notice.warn{background:#4a3a14;color:#ffe3a3;border-color:#7a6224}
+.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;min-width:550px}th{text-align:left;padding:13px;color:var(--green);font-size:12px;background:#0b1523}td{padding:13px;border-bottom:1px solid var(--line);font-size:13px;color:#d4deea}tr:last-child td{border-bottom:0}
+table.league{min-width:640px}table.league th,table.league td{padding:10px 9px;text-align:center}table.league th:nth-child(2),table.league td:nth-child(2){text-align:left}
+table.league tr.me td{background:#123c30;color:#fff;font-weight:800}
+table.league tr.up td:first-child{border-left:3px solid var(--green)}table.league tr.down td:first-child{border-left:3px solid var(--red)}
+table.history{min-width:820px}table.history tr.live td{background:#14283a}
+.result-win{color:var(--green);font-weight:800}.result-loss{color:var(--red);font-weight:800}.result-draw{color:var(--yellow);font-weight:800}
+ul.guide{padding-left:20px;color:#c5d1df;line-height:2}footer{text-align:center;padding:25px;background:#080f1b;color:var(--green);font-size:12px}footer p{color:#8796aa;margin-top:7px}
+.hidden{display:none!important}.pill{display:inline-block;border-radius:20px;padding:5px 9px;background:#183c35;color:var(--green);font-size:11px;font-weight:800}
+.transfer-form{max-width:510px}.transfer-form button{margin-top:6px}
+.trophies{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.trophy{background:#0b1523;border:1px solid #22344b;border-top:3px solid var(--yellow);border-radius:10px;padding:16px}
+.trophy .ico{font-size:30px}.trophy strong{display:block;margin:7px 0 4px;font-size:14px}.trophy span{color:var(--muted);font-size:12px;line-height:1.5;display:block}
+@media(max-width:800px){.grid,.stats{grid-template-columns:repeat(2,minmax(0,1fr))}header{justify-content:center}nav{justify-content:center}}
+@media(max-width:480px){main{width:92%;margin:22px auto}.form-card{padding:22px}.hero{padding:55px 15px}.grid,.stats{gap:9px}.card,.panel{padding:15px}.card h3{font-size:16px}nav button{padding:8px;font-size:12px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">FOOTBALL <span>CAREER</span></div>
+  <nav id="nav" class="hidden">
+    <button data-page="dashboard">Início</button>
+    <button data-page="season">Temporada</button>
+    <button data-page="table">Tabela</button>
+    <button data-page="career">Carreira</button>
+    <button data-page="transfer">Transferências</button>
+    <button data-page="ranking">Ranking</button>
+    <button data-page="help">Ajuda</button>
+    <button id="logout" class="danger">Sair</button>
+  </nav>
+</header>
+<main id="app"></main>
+<footer>FOOTBALL CAREER SIMULATOR © 2026<p>Desenvolva sua carreira e faça história.</p></footer>
+<script>
+"use strict";
+const LEAGUES={
+ "Brasileirão Série A":["Athletico-PR","Atlético-MG","Bahia","Botafogo","Chapecoense","Corinthians","Coritiba","Cruzeiro","Flamengo","Fluminense","Grêmio","Internacional","Mirassol","Palmeiras","Red Bull Bragantino","Remo","Santos","São Paulo","Vasco da Gama","Vitória"],
+ "Premier League":["Arsenal","Aston Villa","Bournemouth","Brentford","Brighton","Chelsea","Coventry City","Crystal Palace","Everton","Fulham","Hull City","Ipswich Town","Leeds United","Liverpool","Manchester City","Manchester United","Newcastle United","Nottingham Forest","Sunderland","Tottenham"],
+ "LaLiga":["Athletic Club","Atlético de Madrid","CA Osasuna","Celta de Vigo","Deportivo Alavés","Elche CF","FC Barcelona","Getafe CF","Levante UD","Málaga CF","Racing Santander","Rayo Vallecano","RC Deportivo","RCD Espanyol","Real Betis","Real Madrid","Real Sociedad","Sevilla FC","Valencia CF","Villarreal CF"],
+ "Serie A (Itália)":["Atalanta","Bologna","Cagliari","Como","Cremonese","Fiorentina","Genoa","Hellas Verona","Inter de Milão","Juventus","Lazio","Lecce","Milan","Napoli","Parma","Pisa","Roma","Sassuolo","Torino","Udinese"],
+ "Ligue 1":["Angers SCO","AJ Auxerre","Stade Brestois","Le Havre AC","RC Lens","LOSC Lille","FC Lorient","Olympique Lyonnais","Olympique de Marseille","FC Metz","AS Monaco","FC Nantes","OGC Nice","Paris FC","Paris Saint-Germain","Stade Rennais","RC Strasbourg","Toulouse FC"],
+ "Bundesliga":["FC Augsburg","Bayer Leverkusen","Bayern de Munique","Borussia Dortmund","Borussia M'gladbach","Eintracht Frankfurt","SC Freiburg","Hamburger SV","1. FC Heidenheim","TSG Hoffenheim","1. FC Köln","RB Leipzig","1. FSV Mainz 05","FC St. Pauli","VfB Stuttgart","Union Berlin","Werder Bremen","VfL Wolfsburg"]
+};
+// Times da divisão inferior: sobem para ocupar o lugar dos rebaixados
+const PROMOCAO={
+ "Brasileirão Série A":["América-MG","Avaí","Ceará","CRB","Goiás","Juventude","Náutico","Novorizontino","Operário-PR","Paysandu","Ponte Preta","Sport","Vila Nova","Criciúma","Athletic-MG","Botafogo-SP","Ferroviária","Londrina","Volta Redonda","Amazonas"],
+ "Premier League":["Birmingham City","Blackburn Rovers","Bristol City","Burnley","Cardiff City","Derby County","Leicester City","Middlesbrough","Millwall","Norwich City","Oxford United","Plymouth Argyle","Portsmouth","Preston North End","Queens Park Rangers","Sheffield United","Sheffield Wednesday","Southampton","Stoke City","Swansea City","Watford","West Bromwich Albion","Wrexham","Charlton Athletic"],
+ "LaLiga":["Almería","Cádiz CF","Granada CF","UD Las Palmas","Real Valladolid","CD Leganés","SD Eibar","Sporting de Gijón","Real Zaragoza","CD Tenerife","Albacete","Burgos CF","FC Cartagena","CD Castellón","Córdoba CF","SD Huesca","CD Mirandés","Racing de Ferrol"],
+ "Serie A (Itália)":["Palermo","Venezia","Sampdoria","Bari","Spezia","Frosinone","Modena","Catanzaro","Cesena","Juve Stabia","Südtirol","Reggiana","Mantova","Carrarese","Padova","Empoli","Monza","Brescia","Cosenza"],
+ "Ligue 1":["AS Saint-Étienne","Montpellier HSC","Stade de Reims","ESTAC Troyes","EA Guingamp","USL Dunkerque","Red Star FC","Annecy FC","Pau FC","Amiens SC","Rodez AF","Grenoble Foot 38","Stade Lavallois","Clermont Foot","SC Bastia","FC Martigues","AS Nancy","SM Caen"],
+ "Bundesliga":["Hannover 96","Hertha BSC","Schalke 04","Fortuna Düsseldorf","Karlsruher SC","1. FC Nürnberg","Hansa Rostock","SV Elversberg","Holstein Kiel","Greuther Fürth","SC Paderborn","Eintracht Braunschweig","Darmstadt 98","1. FC Magdeburg","1. FC Kaiserslautern","Preußen Münster","Arminia Bielefeld","VfL Bochum"]
+};
+const TIMES=Object.values(LEAGUES).flat();
+const TEAM_RATINGS={
+ "Flamengo":88,"Palmeiras":88,"Real Madrid":95,"FC Barcelona":93,"Manchester City":94,"Liverpool":91,"Arsenal":91,"Atlético de Madrid":89,"Bayern de Munique":92,"Chelsea":88,"Manchester United":86,"Athletico-PR":79,"Atlético-MG":82,"Bahia":78,"Botafogo":80,"Chapecoense":70,"Corinthians":79,"Coritiba":72,"Cruzeiro":82,"Fluminense":80,"Grêmio":80,"Internacional":81,"Mirassol":73,"Red Bull Bragantino":77,"Remo":68,"Santos":78,"São Paulo":82,"Vasco da Gama":77,"Vitória":74,
+ "Aston Villa":86,"Bournemouth":79,"Brentford":78,"Brighton":82,"Coventry City":72,"Crystal Palace":80,"Everton":78,"Fulham":79,"Hull City":70,"Ipswich Town":72,"Leeds United":77,"Newcastle United":87,"Nottingham Forest":81,"Sunderland":74,"Tottenham":85,
+ "Athletic Club":84,"CA Osasuna":78,"Celta de Vigo":79,"Deportivo Alavés":75,"Elche CF":73,"Getafe CF":77,"Levante UD":73,"Málaga CF":70,"Racing Santander":72,"Rayo Vallecano":79,"RC Deportivo":73,"RCD Espanyol":77,"Real Betis":84,"Real Sociedad":85,"Sevilla FC":82,"Valencia CF":81,"Villarreal CF":87,
+ "Inter de Milão":90,"Milan":85,"Juventus":86,"Napoli":86,"Atalanta":85,"Roma":83,"Lazio":81,"Fiorentina":80,"Bologna":80,"Torino":76,"Genoa":74,"Udinese":74,"Como":75,"Cagliari":71,"Parma":72,"Lecce":70,"Sassuolo":72,"Cremonese":69,"Pisa":69,"Hellas Verona":70,
+ "Paris Saint-Germain":92,"Olympique de Marseille":84,"AS Monaco":83,"Olympique Lyonnais":82,"LOSC Lille":82,"OGC Nice":79,"RC Lens":80,"Stade Rennais":79,"Stade Brestois":76,"RC Strasbourg":77,"FC Nantes":73,"Toulouse FC":74,"Angers SCO":70,"Le Havre AC":69,"AJ Auxerre":71,"FC Lorient":70,"FC Metz":69,"Paris FC":70,
+ "Borussia Dortmund":87,"RB Leipzig":85,"Bayer Leverkusen":87,"Eintracht Frankfurt":80,"VfB Stuttgart":81,"SC Freiburg":78,"VfL Wolfsburg":77,"Borussia M'gladbach":76,"TSG Hoffenheim":76,"Werder Bremen":75,"FC Augsburg":73,"1. FSV Mainz 05":74,"Union Berlin":74,"FC St. Pauli":72,"1. FC Köln":72,"Hamburger SV":73,"1. FC Heidenheim":71
+};
+function rating(t){return TEAM_RATINGS[t]??72}
+const POSICOES=["Goleiro","Zagueiro","Meio-campista","Atacante"];
+const MIN_SEASONS_AT_CLUB=2;
+const STORE="footballCareerSimulator_v1";
+let state=loadState(), currentUser=state.currentUser||null, notice="";
+function loadState(){try{return JSON.parse(localStorage.getItem(STORE))||{users:[],careers:{},matches:{},currentUser:null}}catch(e){return{users:[],careers:{},matches:{},currentUser:null}}}
+function save(){state.currentUser=currentUser;localStorage.setItem(STORE,JSON.stringify(state))}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function pageHead(title,sub){return `<div class="page-head"><div class="eyebrow">Modo carreira</div><h1>${title}</h1><p>${sub}</p></div>`}
+function showNotice(){if(!notice)return"";let n=`<div class="notice">${esc(notice)}</div>`;notice="";return n}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function downCount(league){return{"Brasileirão Série A":4,"Bundesliga":2}[league]||3}
+
+/* ===== Mundo da carreira: clubes de cada liga e fila de times que podem subir ===== */
+function ensureWorld(c){
+ if(!c.world)c.world={};
+ Object.keys(LEAGUES).forEach(l=>{if(!c.world[l])c.world[l]={clubs:LEAGUES[l].slice(),pool:shuffle(PROMOCAO[l])}});
+ if(c.clubSeasons===undefined)c.clubSeasons=Math.max(0,(c.season||1)-1);
+ if(c.lastMoves===undefined)c.lastMoves=null;
+ if(c.pendingMove===undefined)c.pendingMove=false;
+ if(!c.history)c.history=[];
+ if(!c.trophies)c.trophies=[];
+}
+function clubs(c){return c.world[c.league].clubs}
+// Cada liga tem seu número de rodadas: turno e returno (20 clubes = 38, 18 clubes = 34)
+function totalRounds(c){return(clubs(c).length-1)*2}
+
+/* ===== Liga: tabela e calendário ===== */
+const SEASON_STATS=["matches","wins","draws","losses","goals","assists","yellows","reds","points"];
+function newTable(list){const t={};list.forEach(n=>t[n]={p:0,w:0,d:0,l:0,gf:0,ga:0,pts:0});return t}
+const FIX={};
+function fixtures(list){
+ const key=list.join("|");
+ if(FIX[key])return FIX[key];
+ const teams=list.slice(),n=teams.length,first=[];let arr=teams.slice();
+ for(let r=0;r<n-1;r++){
+  const round=[];
+  for(let i=0;i<n/2;i++){let a=arr[i],b=arr[n-1-i];round.push((r+i)%2===0?[a,b]:[b,a])}
+  first.push(round);
+  arr=[arr[0],arr[n-1],...arr.slice(1,n-1)];
+ }
+ const second=first.map(round=>round.map(([h,a])=>[a,h]));
+ return FIX[key]=first.concat(second);
+}
+function addResult(table,team,gf,ga){
+ const t=table[team];t.p++;t.gf+=gf;t.ga+=ga;
+ if(gf>ga){t.w++;t.pts+=3}else if(gf===ga){t.d++;t.pts++}else t.l++;
+}
+function sortedTable(c){
+ return Object.entries(c.table).map(([name,t])=>({name,...t,gd:t.gf-t.ga}))
+  .sort((a,b)=>b.pts-a.pts||b.gd-a.gd||b.gf-a.gf||a.name.localeCompare(b.name,"pt-BR"));
+}
+function myPosition(c){return sortedTable(c).findIndex(r=>r.name===c.team)+1}
+function ensureCareer(c){
+ c.league=c.league||"Brasileirão Série A";
+ ensureWorld(c);
+ if(!c.table||c.round===undefined){
+  c.table=newTable(clubs(c));c.round=0;
+  SEASON_STATS.forEach(k=>c[k]=0);
+  state.matches[currentUser.email]=(state.matches[currentUser.email]||[]).filter(m=>m.season!==c.season);
+ }
+}
+function activeCareer(){if(!currentUser)return null;const c=state.careers[currentUser.email]||null;if(c)ensureCareer(c);return c}
+function matches(){return currentUser?(state.matches[currentUser.email]||[]):[]}
+
+function render(){
+ const app=document.getElementById("app"),nav=document.getElementById("nav"),career=activeCareer();
+ nav.classList.toggle("hidden",!currentUser);
+ if(!currentUser){app.innerHTML=showNotice()+`<section class="hero"><div class="eyebrow">Sua história começa agora</div><h1>FOOTBALL CAREER<br>SIMULATOR</h1><p>Construa sua carreira. Conquiste títulos. Torne-se uma lenda.</p><div class="actions"><button onclick="renderLogin()">Entrar</button><button class="secondary" onclick="renderRegister()">Criar conta</button></div></section>`;return}
+ if(!career){renderCreate();return}
+ renderDashboard();
+}
+function renderLogin(){document.getElementById("app").innerHTML=showNotice()+`<section class="form-card"><h2>Entrar no jogo</h2><p>Acesse sua carreira e continue de onde parou.</p><form id="loginForm"><label>Email</label><input name="email" type="email" required><label>Senha</label><input name="password" type="password" required><button>Entrar</button></form><div class="form-foot">Não possui conta? <button class="link" onclick="renderRegister()">Cadastre-se</button></div><div class="form-foot"><button class="link" onclick="render()">Voltar</button></div></section>`;
+ document.getElementById("loginForm").onsubmit=e=>{e.preventDefault();let f=new FormData(e.target),email=f.get("email").trim().toLowerCase(),pass=f.get("password"),u=state.users.find(x=>x.email===email&&x.password===pass);if(!u){notice="Email ou senha incorretos.";renderLogin();return}currentUser=u;save();render()}}
+function renderRegister(){document.getElementById("app").innerHTML=showNotice()+`<section class="form-card"><h2>Criar conta</h2><p>Crie seu perfil para salvar sua carreira neste navegador.</p><form id="registerForm"><label>Nome de usuário</label><input name="name" required maxlength="35" placeholder="Seu nome"><label>Email</label><input name="email" type="email" required><label>Senha</label><input name="password" type="password" minlength="6" required placeholder="Mínimo de 6 caracteres"><button>Cadastrar</button></form><div class="form-foot">Já possui conta? <button class="link" onclick="renderLogin()">Faça login</button></div></section>`;
+ document.getElementById("registerForm").onsubmit=e=>{e.preventDefault();let f=new FormData(e.target),name=f.get("name").trim(),email=f.get("email").trim().toLowerCase(),password=f.get("password");if(state.users.some(u=>u.email===email)){notice="Este email já está cadastrado.";renderRegister();return}let u={name,email,password};state.users.push(u);currentUser=u;save();render()}}
+function renderCreate(){const first=Object.keys(LEAGUES)[0];document.getElementById("app").innerHTML=showNotice()+`<section class="form-card"><h2>Crie seu jogador</h2><p>Escolha suas características para começar sua carreira.</p><form id="createForm"><label>Nome do jogador</label><input name="player" required maxlength="35" placeholder="Nome do atleta"><label>Idade</label><input name="age" type="number" min="16" max="45" value="18" required><label>Posição</label><select name="position">${POSICOES.map(p=>`<option>${p}</option>`).join("")}</select><label>Escolha a liga</label><select name="league" id="leagueSelect">${Object.keys(LEAGUES).map(l=>`<option>${l}</option>`).join("")}</select><label>Escolha seu clube</label><select name="team" id="teamSelect">${LEAGUES[first].map(t=>`<option>${esc(t)}</option>`).join("")}</select><button>Começar minha carreira</button></form></section>`;
+ const leagueSelect=document.getElementById("leagueSelect"),teamSelect=document.getElementById("teamSelect");
+ leagueSelect.addEventListener("change",()=>{teamSelect.innerHTML=LEAGUES[leagueSelect.value].map(t=>`<option>${esc(t)}</option>`).join("")});
+ document.getElementById("createForm").onsubmit=e=>{e.preventDefault();let f=new FormData(e.target);
+  const c={player:f.get("player").trim(),age:+f.get("age"),position:f.get("position"),league:f.get("league"),team:f.get("team"),season:1,level:1,skill:60,matches:0,wins:0,draws:0,losses:0,goals:0,assists:0,yellows:0,reds:0,points:0,round:0,clubSeasons:0,lastMoves:null,pendingMove:false,history:[],trophies:[]};
+  ensureWorld(c);c.table=newTable(clubs(c));
+  state.careers[currentUser.email]=c;state.matches[currentUser.email]=[];save();notice="Sua carreira começou!";render()}}
+function stat(n,label,cls){return `<div class="stat${cls?" "+cls:""}"><strong>${n}</strong><span>${label}</span></div>`}
+function renderDashboard(){let c=activeCareer();if(c.pendingMove){renderTransfer();return}
+ const T=totalRounds(c);
+ let last=matches()[0],done=c.round>=T,pos=myPosition(c);
+ let next=null;if(!done){const pair=fixtures(clubs(c))[c.round].find(p=>p.includes(c.team));next={home:pair[0]===c.team,op:pair[0]===c.team?pair[1]:pair[0]}}
+ const canMove=c.clubSeasons>=MIN_SEASONS_AT_CLUB&&c.round===0;
+ document.getElementById("app").innerHTML=showNotice()+pageHead("PAINEL DA CARREIRA",`Bem-vindo, ${esc(c.player)}! A temporada ${c.season} está em andamento.`)+
+`<section class="grid"><div class="card"><small>JOGADOR</small><h3>${esc(c.player)}</h3></div><div class="card"><small>CLUBE</small><h3>${esc(c.team)}</h3></div><div class="card"><small>LIGA</small><h3>${esc(c.league)}</h3></div><div class="card"><small>IDADE</small><h3>${c.age} anos</h3></div></section>
+<section class="panel"><h2>Estatísticas da temporada ${c.season}</h2><div class="stats">${stat(c.round+"/"+T,"Rodada")}${stat(pos+"º","Posição na liga")}${stat(c.matches,"Partidas")}${stat(c.goals,"Gols")}${stat(c.assists,"Assistências")}${stat(c.wins,"Vitórias")}${stat(c.draws,"Empates")}${stat(c.losses,"Derrotas")}${stat(c.points,"Pontos")}${stat(c.skill,"Habilidade")}${stat(c.level,"Nível")}${stat(c.yellows,"Amarelos")}${stat(c.reds,"Vermelhos")}</div></section>
+<section class="panel"><h2>Objetivos da carreira</h2><ul class="guide"><li>Disputar as ${T} rodadas da liga (${c.round}/${T}).</li><li>Participar de pelo menos 10 gols (${c.goals+c.assists}/10 entre gols e assistências).</li><li>Terminar entre os 4 primeiros (posição atual: ${pos}º).</li><li>Melhorar sua habilidade (atual: ${c.skill}).</li><li>Cumprir ${MIN_SEASONS_AT_CLUB} temporadas no clube para liberar transferência (${Math.min(c.clubSeasons,MIN_SEASONS_AT_CLUB)}/${MIN_SEASONS_AT_CLUB}).</li></ul></section>
+${next?`<section class="panel"><h2>Próxima rodada (${c.round+1}/${T})</h2><p class="muted">${next.home?"Em casa":"Fora de casa"} contra <strong>${esc(next.op)}</strong></p></section>`:""}
+<div class="actions-row"><button ${done?"disabled":""} onclick="playMatch()">⚽ Jogar próxima partida</button><button class="secondary" ${done?"disabled":""} onclick="simSeason()">⏩ Simular até o fim da temporada</button><button class="secondary" onclick="go('table')">Ver tabela da liga</button><button class="secondary" onclick="go('season')">Ver temporada completa</button><button class="secondary" onclick="go('career')">🏆 Minha carreira</button><button class="secondary" onclick="go('transfer')">🔁 ${canMove?"Mudar de clube":"Transferências"}</button><button class="secondary" onclick="go('ranking')">Ver ranking mundial</button></div>
+${canMove?`<div class="notice">Você já cumpriu ${MIN_SEASONS_AT_CLUB} temporadas no clube: a janela de transferências está aberta até a primeira rodada.</div>`:""}
+${done?`<div class="notice">Temporada encerrada! Vá em "Temporada" para começar a próxima.</div>`:""}
+${last?`<section class="panel"><h2>Última partida</h2><p class="muted">${esc(last.team)} · Temporada ${last.season}${last.round?` · Rodada ${last.round}`:""}</p><div class="score">${last.gf} <small>X</small> ${last.ga}</div><p class="${last.result==='Vitória'?'result-win':last.result==='Derrota'?'result-loss':'result-draw'}" style="text-align:center">${last.result}</p>${last.pg!==undefined?`<p class="muted" style="text-align:center">Sua participação: ${last.pg} gol(s) e ${last.pa} assistência(s)</p>`:""}</section>`:""}`}
+
+/* ===== Simulação ===== */
+function randomGoals(expected){let probability=Math.exp(-expected),cumulative=probability,r=Math.random();if(r<cumulative)return 0;for(let goals=1;goals<=5;goals++){probability*=expected/goals;cumulative+=probability;if(r<cumulative)return goals}return 5}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function simOther(h,a){
+ const rh=rating(h),ra=rating(a);
+ return [randomGoals(clamp(1.25+(rh-ra)*.02,.35,3.4)),randomGoals(clamp(1.0+(ra-rh)*.02,.3,3.0))];
+}
+// Cada gol do time só pode ser: gol do jogador, assistência do jogador ou de outro companheiro.
+// Assim gols + assistências do jogador nunca passam do total de gols do time.
+function playerContribution(c,teamGoals){
+ const skillBonus=(c.skill-60)*.002;
+ const base={"Atacante":[.45,.15],"Meio-campista":[.15,.30],"Zagueiro":[.04,.05],"Goleiro":[.003,.01]}[c.position]||[.1,.1];
+ const pG=clamp(base[0]+skillBonus,0,.75),pA=clamp(base[1]+skillBonus,0,.6);
+ let goals=0,assists=0;
+ for(let i=0;i<teamGoals;i++){
+  const r=Math.random();
+  if(r<pG)goals++;else if(r<pG+pA)assists++;
+ }
+ return{goals,assists};
+}
+function doMatch(){
+ const c=activeCareer();if(c.pendingMove||c.round>=totalRounds(c))return false;
+ const round=fixtures(clubs(c))[c.round],pair=round.find(p=>p.includes(c.team)),home=pair[0]===c.team,op=home?pair[1]:pair[0];
+ // demais jogos da rodada
+ round.forEach(([h,a])=>{if(h===c.team||a===c.team)return;const[gh,ga]=simOther(h,a);addResult(c.table,h,gh,ga);addResult(c.table,a,ga,gh)});
+ // jogo do jogador
+ const clubRating=rating(c.team),opponentRating=rating(op);
+ const playerExpected=clamp(1.05+(c.skill-60)*.018+(clubRating-78)*.012+(home?.15:-.1),.35,3.6);
+ const opponentExpected=clamp(1.05+(opponentRating-clubRating)*.018+(home?-.1:.15),.35,3.2);
+ const gf=randomGoals(playerExpected),ga=randomGoals(opponentExpected);
+ const result=gf>ga?"Vitória":gf===ga?"Empate":"Derrota",points=gf>ga?3:gf===ga?1:0;
+ const contrib=playerContribution(c,gf);
+ addResult(c.table,c.team,gf,ga);addResult(c.table,op,ga,gf);
+ c.round++;c.matches++;c.wins+=result==="Vitória"?1:0;c.draws+=result==="Empate"?1:0;c.losses+=result==="Derrota"?1:0;
+ c.goals+=contrib.goals;c.assists+=contrib.assists;
+ c.yellows+=Math.random()<.15?1:0;c.reds+=Math.random()<.02?1:0;c.points+=points;
+ if(result==="Vitória"){c.skill=Math.min(99,c.skill+1);if(Math.random()<.3)c.level=Math.min(99,c.level+1)}
+ state.matches[currentUser.email].unshift({team:op,gf,ga,result,season:c.season,round:c.round,home,pg:contrib.goals,pa:contrib.assists});
+ return true;
+}
+function playMatch(){const c=activeCareer();if(!doMatch())return;save();notice=`Partida encerrada: ${matches()[0].result}!`+(c.round>=totalRounds(c)?` A liga acabou — você terminou em ${myPosition(c)}º lugar.`:"");renderDashboard()}
+function simSeason(){const c=activeCareer();while(c.round<totalRounds(c))doMatch();save();notice=`Temporada simulada! Você terminou em ${myPosition(c)}º lugar.`;renderDashboard()}
+function go(p){
+ const c=activeCareer();
+ if(c&&c.pendingMove&&p!=="help"&&p!=="career"){renderTransfer();return}
+ document.querySelectorAll("nav [data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page===p));
+ if(p==="dashboard")renderDashboard();if(p==="season")renderSeason();if(p==="table")renderTable();if(p==="career")renderCareerStats();if(p==="transfer")renderTransfer();if(p==="ranking")renderRanking();if(p==="help")renderHelp()}
+
+function renderTable(){
+ const c=activeCareer(),rows=sortedTable(c),down=downCount(c.league),T=totalRounds(c);
+ const lm=c.lastMoves&&c.lastMoves.league===c.league?`<section class="panel"><h2>Virada da temporada ${c.lastMoves.season}</h2><p class="muted">⬇ Rebaixados: ${c.lastMoves.relegated.map(esc).join(", ")}</p><p class="muted">⬆ Promovidos: ${c.lastMoves.promoted.map(esc).join(", ")}</p></section>`:"";
+ document.getElementById("app").innerHTML=showNotice()+pageHead(`TABELA · ${esc(c.league).toUpperCase()}`,`Temporada ${c.season} · Rodada ${c.round} de ${T}`)+
+ `<section class="panel"><div class="table-wrap"><table class="league"><thead><tr><th>#</th><th>Clube</th><th>J</th><th>V</th><th>E</th><th>D</th><th>GP</th><th>GC</th><th>SG</th><th>Pts</th></tr></thead><tbody>${rows.map((r,i)=>`<tr class="${r.name===c.team?"me ":""}${i<4?"up":i>=rows.length-down?"down":""}"><td>${i+1}</td><td>${esc(r.name)}</td><td>${r.p}</td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td><td>${r.gf}</td><td>${r.ga}</td><td>${r.gd>0?"+":""}${r.gd}</td><td><strong>${r.pts}</strong></td></tr>`).join("")}</tbody></table></div></section><p class="muted">Verde: 4 primeiros (vagas continentais) · Vermelho: zona de rebaixamento (${down} últimos) · Seu clube está destacado.</p>`+lm;
+}
+function renderSeason(){let c=activeCareer(),T=totalRounds(c),list=matches().filter(m=>m.season===c.season).slice().reverse(),rate=c.matches?Math.round(c.points/(c.matches*3)*100):0,done=c.round>=T;
+ document.getElementById("app").innerHTML=showNotice()+pageHead(`TEMPORADA ${c.season}`,"Relatório completo do desempenho do jogador.")+`<section class="panel"><h2>Resumo da temporada</h2><div class="stats">${stat(c.round+"/"+T,"Rodada")}${stat(c.matches,"Partidas")}${stat(c.points,"Pontos")}${stat(rate+"%","Aproveitamento")}${stat(c.goals,"Gols")}${stat(c.assists,"Assistências")}${stat(c.wins,"Vitórias")}${stat(c.draws,"Empates")}${stat(c.losses,"Derrotas")}</div></section><section class="panel"><h2>Histórico de partidas</h2><div class="table-wrap"><table><thead><tr><th>Rodada</th><th>Local</th><th>Adversário</th><th>Placar</th><th>Resultado</th><th>Gols</th><th>Assist.</th></tr></thead><tbody>${list.length?list.map(m=>`<tr><td>${m.round??"-"}</td><td>${m.home===undefined?"-":m.home?"Casa":"Fora"}</td><td>${esc(m.team)}</td><td>${m.gf} x ${m.ga}</td><td class="${m.result==='Vitória'?'result-win':m.result==='Derrota'?'result-loss':'result-draw'}">${m.result}</td><td>${m.pg??"-"}</td><td>${m.pa??"-"}</td></tr>`).join(""):`<tr><td colspan="7">Nenhuma partida disputada.</td></tr>`}</tbody></table></div></section><section class="panel"><h2>Encerrar temporada</h2><p class="muted">É necessário disputar as ${T} rodadas da liga. Sua idade aumenta um ano, a tabela é reiniciada, as estatísticas da temporada são zeradas (e ficam salvas na sua carreira) e os ${downCount(c.league)} últimos colocados são rebaixados, dando lugar a times que sobem da divisão inferior. Se o seu clube for rebaixado, você precisará escolher um novo clube.</p><div class="actions-row"><button ${done?'':'disabled'} onclick="endSeason()">Começar nova temporada</button></div>${done?"":`<p class="muted">Faltam ${T-c.round} rodadas.</p>`}</section>`}
+
+function endSeason(){
+ let c=activeCareer();const T=totalRounds(c);if(c.round<T)return;
+ const rows=sortedTable(c),pos=rows.findIndex(r=>r.name===c.team)+1,oldAge=c.age;
+ const goalsAgainst=c.table[c.team].ga;
+ // registro da temporada na carreira
+ c.history.push({season:c.season,age:c.age,team:c.team,league:c.league,pos,matches:c.matches,wins:c.wins,draws:c.draws,losses:c.losses,goals:c.goals,assists:c.assists,yellows:c.yellows,reds:c.reds,points:c.points});
+ // troféus
+ const won=[];
+ if(pos===1){c.trophies.push({season:c.season,kind:"league",name:`Campeão ${c.league}`,team:c.team,league:c.league,info:`${c.points} pontos em ${T} rodadas`});won.push("🏆 Campeão da liga")}
+ const need={"Atacante":22,"Meio-campista":16}[c.position];
+ if(need&&c.goals+c.assists>=need){c.trophies.push({season:c.season,kind:"award",name:"Craque da temporada",team:c.team,league:c.league,info:`${c.goals} gols e ${c.assists} assistências`});won.push("⭐ Craque da temporada")}
+ if((c.position==="Zagueiro"||c.position==="Goleiro")&&goalsAgainst<=T*0.8){c.trophies.push({season:c.season,kind:"award",name:"Muralha da temporada",team:c.team,league:c.league,info:`Apenas ${goalsAgainst} gols sofridos`});won.push("⭐ Muralha da temporada")}
+ const w=c.world[c.league],down=downCount(c.league);
+ // rebaixados saem, promovidos entram
+ const relegated=rows.slice(-down).map(r=>r.name);
+ const promoted=w.pool.splice(0,down);
+ w.clubs=w.clubs.filter(t=>!relegated.includes(t)).concat(promoted);
+ w.pool.push(...relegated);
+ // as outras ligas também mudam de elenco de clubes
+ Object.keys(c.world).forEach(l=>{
+  if(l===c.league)return;
+  const o=c.world[l],d=downCount(l);
+  const out=shuffle(o.clubs.slice().sort((a,b)=>rating(a)-rating(b)).slice(0,8)).slice(0,d);
+  const inn=o.pool.splice(0,d);
+  o.clubs=o.clubs.filter(t=>!out.includes(t)).concat(inn);
+  o.pool.push(...out);
+ });
+ c.lastMoves={season:c.season,league:c.league,relegated,promoted};
+ c.season++;c.age=Math.min(45,c.age+1);SEASON_STATS.forEach(k=>c[k]=0);c.round=0;c.clubSeasons++;
+ c.table=newTable(w.clubs);
+ const wasRelegated=relegated.includes(c.team);
+ if(wasRelegated)c.pendingMove=true;
+ save();
+ notice=`Nova temporada iniciada! Você terminou a anterior em ${pos}º lugar. Rebaixados: ${relegated.join(", ")}. Promovidos: ${promoted.join(", ")}.`+(won.length?` Conquistas: ${won.join(" · ")}.`:"")+(oldAge>=45?" Idade máxima atingida.":"");
+ if(wasRelegated){renderTransfer();return}
+ renderDashboard();
+}
+
+/* ===== Estatísticas da carreira ===== */
+function careerRows(c){
+ const rows=c.history.map(r=>({...r}));
+ if(c.round>0&&!c.pendingMove)rows.push({season:c.season,age:c.age,team:c.team,league:c.league,pos:myPosition(c),matches:c.matches,wins:c.wins,draws:c.draws,losses:c.losses,goals:c.goals,assists:c.assists,yellows:c.yellows,reds:c.reds,points:c.points,live:true});
+ return rows;
+}
+function renderCareerStats(){
+ const c=activeCareer(),rows=careerRows(c);
+ const sum=k=>rows.reduce((s,r)=>s+(r[k]||0),0);
+ const m=sum("matches"),w=sum("wins"),d=sum("draws"),l=sum("losses"),g=sum("goals"),a=sum("assists"),pts=sum("points"),yc=sum("yellows"),rc=sum("reds");
+ const titles=c.trophies.filter(t=>t.kind==="league").length,awards=c.trophies.length-titles;
+ const rate=m?Math.round(pts/(m*3)*100):0,avgG=m?(g/m).toFixed(2):"0.00",avgA=m?(a/m).toFixed(2):"0.00";
+ const best=rows.slice().sort((x,y)=>(y.goals+y.assists)-(x.goals+x.assists))[0];
+ const clubsList=[...new Set(rows.map(r=>r.team).concat(c.pendingMove?[]:[c.team]))];
+ const leaguesList=[...new Set(rows.map(r=>r.league).concat(c.pendingMove?[]:[c.league]))];
+ const seasonsDone=c.history.length;
+ const oldNote=c.season-1>seasonsDone?`<p class="muted" style="margin-top:12px">Temporadas anteriores a esta atualização não têm registro detalhado e não entram nos totais.</p>`:"";
+ const trophyHtml=c.trophies.length?`<div class="trophies">${c.trophies.slice().reverse().map(t=>`<div class="trophy"><div class="ico">${t.kind==="league"?"🏆":"⭐"}</div><strong>${esc(t.name)}</strong><span>Temporada ${t.season} · ${esc(t.team)}</span><span>${esc(t.league)}</span>${t.info?`<span>${esc(t.info)}</span>`:""}</div>`).join("")}</div>`:`<p class="muted">Nenhum troféu ainda. Seja campeão da liga ou faça uma grande temporada para conquistar prêmios.</p>`;
+ const tableHtml=rows.length?`<div class="table-wrap"><table class="history"><thead><tr><th>Temp.</th><th>Idade</th><th>Clube</th><th>Liga</th><th>Pos.</th><th>J</th><th>V</th><th>E</th><th>D</th><th>Gols</th><th>Assist.</th><th>Pts</th><th>Troféus</th></tr></thead><tbody>${rows.map(r=>`<tr class="${r.live?"live":""}"><td>${r.season}${r.live?" <span class=\"pill\">em andamento</span>":""}</td><td>${r.age}</td><td>${esc(r.team)}</td><td>${esc(r.league)}</td><td>${r.pos}º</td><td>${r.matches}</td><td>${r.wins}</td><td>${r.draws}</td><td>${r.losses}</td><td>${r.goals}</td><td>${r.assists}</td><td>${r.points}</td><td>${c.trophies.filter(t=>t.season===r.season&&t.team===r.team).map(t=>t.kind==="league"?"🏆":"⭐").join(" ")||"-"}</td></tr>`).join("")}</tbody></table></div>`:`<p class="muted">Você ainda não disputou nenhuma partida.</p>`;
+ document.getElementById("app").innerHTML=showNotice()+pageHead("MINHA CARREIRA",`${esc(c.player)} · ${esc(c.position)} · ${c.pendingMove?"sem clube":esc(c.team)}`)+
+ `<section class="panel"><h2>Troféus e prêmios</h2><div class="stats" style="margin-bottom:18px">${stat(titles,"Títulos de liga","gold")}${stat(awards,"Prêmios individuais","gold")}${stat(c.trophies.length,"Total de troféus","gold")}${stat(seasonsDone,"Temporadas completas")}</div>${trophyHtml}</section>
+ <section class="panel"><h2>Números da carreira</h2><div class="stats">${stat(m,"Partidas")}${stat(g,"Gols")}${stat(a,"Assistências")}${stat(g+a,"Participações em gols")}${stat(avgG,"Gols por jogo")}${stat(avgA,"Assist. por jogo")}${stat(w,"Vitórias")}${stat(d,"Empates")}${stat(l,"Derrotas")}${stat(pts,"Pontos")}${stat(rate+"%","Aproveitamento")}${stat(yc+" / "+rc,"Amarelos / Vermelhos")}</div></section>
+ <section class="panel"><h2>Perfil atual</h2><div class="stats">${stat(c.age,"Idade")}${stat(c.skill,"Habilidade")}${stat(c.level,"Nível")}${stat(clubsList.length,"Clubes defendidos")}</div><ul class="guide" style="margin-top:14px"><li>Clubes: ${clubsList.length?clubsList.map(esc).join(", "):"-"}</li><li>Ligas: ${leaguesList.length?leaguesList.map(esc).join(", "):"-"}</li>${best&&(best.goals+best.assists)>0?`<li>Melhor temporada: ${best.season} no ${esc(best.team)} (${best.goals} gols e ${best.assists} assistências)</li>`:""}</ul></section>
+ <section class="panel"><h2>Histórico por temporada</h2>${tableHtml}${oldNote}</section>`;
+}
+
+/* ===== Transferências ===== */
+function teamOptions(c,league){
+ return c.world[league].clubs.filter(t=>t!==c.team).slice().sort((a,b)=>rating(b)-rating(a)||a.localeCompare(b,"pt-BR"))
+  .map(t=>`<option value="${esc(t)}">${esc(t)} (força ${rating(t)})</option>`).join("");
+}
+function renderTransfer(){
+ const c=activeCareer(),forced=c.pendingMove,left=Math.max(0,MIN_SEASONS_AT_CLUB-c.clubSeasons);
+ const app=document.getElementById("app");
+ document.querySelectorAll("nav [data-page]").forEach(b=>b.classList.toggle("active",b.dataset.page==="transfer"));
+ let head=showNotice()+pageHead("MERCADO DE TRANSFERÊNCIAS",forced?"Seu clube foi rebaixado. Escolha um novo clube para continuar a carreira.":`Você está no ${esc(c.team)} há ${c.clubSeasons} temporada(s) completa(s).`);
+ if(!forced&&c.clubSeasons<MIN_SEASONS_AT_CLUB){
+  app.innerHTML=head+`<section class="panel"><h2>Transferência bloqueada</h2><p class="muted">É preciso cumprir ${MIN_SEASONS_AT_CLUB} temporadas completas no clube para poder se transferir. Faltam ${left} temporada(s).</p><div class="actions-row"><button class="secondary" onclick="go('dashboard')">Voltar ao painel</button></div></section>`;return;
+ }
+ if(!forced&&c.round>0){
+  app.innerHTML=head+`<section class="panel"><h2>Janela fechada</h2><p class="muted">As transferências só são permitidas no início da temporada, antes da primeira rodada. Termine a temporada atual e comece a próxima.</p><div class="actions-row"><button class="secondary" onclick="go('dashboard')">Voltar ao painel</button></div></section>`;return;
+ }
+ app.innerHTML=head+(forced?`<div class="notice warn">Seu contrato com o ${esc(c.team)} acabou com o rebaixamento. Você pode escolher qualquer clube da liga atual ou de outra liga.</div>`:"")+
+ `<section class="form-card transfer-form"><h2>${forced?"Escolha seu novo clube":"Mudar de clube"}</h2><p>${forced?"Você precisa de um clube para jogar a próxima temporada.":"Você pode ir para qualquer clube de qualquer liga. Depois da transferência, será preciso cumprir mais "+MIN_SEASONS_AT_CLUB+" temporadas para trocar de novo."}</p>
+ <form id="transferForm"><label>Liga</label><select id="trLeague">${Object.keys(LEAGUES).map(l=>`<option ${l===c.league?"selected":""}>${l}</option>`).join("")}</select><label>Novo clube</label><select id="trTeam">${teamOptions(c,c.league)}</select><button>Confirmar transferência</button></form>
+ ${forced?"":`<div class="form-foot"><button class="link" onclick="go('dashboard')">Cancelar</button></div>`}</section>`;
+ const lg=document.getElementById("trLeague"),tm=document.getElementById("trTeam");
+ lg.addEventListener("change",()=>{tm.innerHTML=teamOptions(c,lg.value)});
+ document.getElementById("transferForm").onsubmit=e=>{
+  e.preventDefault();
+  const league=lg.value,team=tm.value;
+  if(!team||!c.world[league].clubs.includes(team))return;
+  c.league=league;c.team=team;c.clubSeasons=0;c.pendingMove=false;c.round=0;
+  c.table=newTable(clubs(c));
+  save();notice=`Transferência concluída! Você agora joga no ${team} (${league}).`;renderDashboard();
+ };
+}
+function renderRanking(){let rows=state.users.map(u=>({user:u.name,c:state.careers[u.email]})).filter(x=>x.c).sort((a,b)=>b.c.points-a.c.points||b.c.goals-a.c.goals||b.c.assists-a.c.assists).slice(0,50);document.getElementById("app").innerHTML=showNotice()+pageHead("RANKING MUNDIAL","Compare seu desempenho com as carreiras criadas neste navegador.")+`<section class="panel"><div class="table-wrap"><table><thead><tr><th>#</th><th>Jogador</th><th>Clube</th><th>Gols</th><th>Assist.</th><th>Pontos</th><th>Nível</th></tr></thead><tbody>${rows.length?rows.map((r,i)=>`<tr><td>${i+1}º</td><td>${esc(r.c.player)} <span class="muted">(${esc(r.user)})</span></td><td>${esc(r.c.team)}</td><td>${r.c.goals}</td><td>${r.c.assists}</td><td>${r.c.points}</td><td>${r.c.level}</td></tr>`).join(""):`<tr><td colspan="7">Nenhum jogador no ranking.</td></tr>`}</tbody></table></div></section><p class="muted">O ranking é local: mostra apenas usuários cadastrados neste navegador.</p>`}
+function renderHelp(){document.getElementById("app").innerHTML=pageHead("GUIA DO JOGO","Tudo o que você precisa saber para construir sua carreira.")+`<section class="panel"><h2>Como começar?</h2><p class="muted">Crie sua conta, escolha a liga (Brasileirão Série A, Premier League, LaLiga, Serie A da Itália, Ligue 1 ou Bundesliga) e depois selecione seu clube.</p><br><h2>Como jogar?</h2><p class="muted">Clique em “Jogar próxima partida” para disputar a rodada. Brasileirão, Premier League, LaLiga e Serie A têm 20 clubes e 38 rodadas; Ligue 1 e Bundesliga têm 18 clubes e 34 rodadas (todas com turno e returno). Os outros jogos da rodada também são simulados e a tabela é atualizada.</p><br><h2>Gols e assistências</h2><p class="muted">Cada gol do seu time só pode ser seu, uma assistência sua ou de um companheiro. Então, num 1 x 0, você faz no máximo um gol ou uma assistência, nunca os dois.</p><br><h2>Como ganhar pontos?</h2><p class="muted">Vitórias valem 3 pontos, empates valem 1 e derrotas não pontuam.</p><br><h2>Como evoluir?</h2><p class="muted">Vitórias aumentam sua habilidade e podem elevar seu nível.</p><br><h2>Estatísticas e troféus</h2><p class="muted">A página “Carreira” mostra seus totais (partidas, gols, assistências, cartões, aproveitamento), o histórico de cada temporada e seus troféus. Você ganha o título de liga ao terminar em 1º lugar. Prêmios individuais: “Craque da temporada” para atacantes (22 gols + assistências) e meio-campistas (16), e “Muralha da temporada” para zagueiros e goleiros cujo time sofra poucos gols.</p><br><h2>Rebaixamento e acesso</h2><p class="muted">No fim da temporada, os últimos colocados caem (4 no Brasileirão, 3 na Premier League, LaLiga, Serie A e Ligue 1, 2 na Bundesliga) e são substituídos por clubes que sobem da divisão inferior. Os rebaixados entram na fila para subir nas próximas temporadas. Se o seu clube cair, você escolhe um novo clube.</p><br><h2>Mudar de clube</h2><p class="muted">Depois de cumprir 2 temporadas completas no mesmo clube, você pode se transferir para qualquer clube de qualquer liga na página “Transferências”, antes da primeira rodada da temporada.</p><br><h2>Como mudar de temporada?</h2><p class="muted">Dispute todas as rodadas e encerre a temporada na página Temporada.</p><br><h2>Onde meus dados ficam?</h2><p class="muted">Os dados ficam salvos no armazenamento local deste navegador. Limpar os dados do navegador pode apagar sua carreira.</p></section>`}
+document.querySelectorAll("nav [data-page]").forEach(b=>b.addEventListener("click",()=>go(b.dataset.page)));
+document.getElementById("logout").addEventListener("click",()=>{currentUser=null;save();render()});
+render();
+</script>
+</body>
+</html>
